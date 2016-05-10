@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/egonelbre/event"
-	"github.com/egonelbre/event/example/guestlist/invitation"
+	"github.com/egonelbre/guestlist/event"
+	"github.com/egonelbre/guestlist/invitation"
 )
 
 type Status struct {

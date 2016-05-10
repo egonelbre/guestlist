@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/egonelbre/event"
+	"github.com/egonelbre/guestlist/event"
 )
 
 type eventlist struct {

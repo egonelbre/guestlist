@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	"github.com/egonelbre/event"
-	"github.com/egonelbre/event/membus"
-	"github.com/egonelbre/event/memstore"
+	"github.com/egonelbre/guestlist/event"
+	"github.com/egonelbre/guestlist/event/membus"
+	"github.com/egonelbre/guestlist/event/memstore"
 
-	"github.com/egonelbre/event/example/guestlist/invitation"
+	"github.com/egonelbre/guestlist/invitation"
 )
 
 var (

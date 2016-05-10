@@ -3,7 +3,7 @@ package invitation
 import (
 	"encoding/gob"
 
-	"github.com/egonelbre/event"
+	"github.com/egonelbre/guestlist/event"
 )
 
 type Created struct {

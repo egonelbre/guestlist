@@ -3,7 +3,7 @@ package invitation
 import (
 	"fmt"
 
-	"github.com/egonelbre/event"
+	"github.com/egonelbre/guestlist/event"
 )
 
 type Service struct {

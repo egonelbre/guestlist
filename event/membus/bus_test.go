@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/egonelbre/event"
+	"github.com/egonelbre/guestlist/event"
 )
 
 func randomEvent() Event {

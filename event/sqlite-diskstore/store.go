@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/egonelbre/event"
+	"github.com/egonelbre/guestlist/event"
 
 	"database/sql"
 
@@ -98,7 +98,7 @@ func (store *Store) Save(id event.AggregateId, expectedVersion int64, events ...
 	}
 
 	stmt, err := tx.Prepare(`
-		INSERT INTO 
+		INSERT INTO
 			event  (id, timestamp, type, version, data)
 			VALUES (?, ?, ?, ?, ?)
 	`)

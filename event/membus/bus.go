@@ -3,7 +3,7 @@ package membus
 import (
 	"sync"
 
-	"github.com/egonelbre/event"
+	"github.com/egonelbre/guestlist/event"
 )
 
 type Bus struct {

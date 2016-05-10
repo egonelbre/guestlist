@@ -1,6 +1,6 @@
 package invitation
 
-import "github.com/egonelbre/event"
+import "github.com/egonelbre/guestlist/event"
 
 type Repository struct {
 	event.Store

@@ -1,48 +1,21 @@
-package diskstore
+package memstore
 
 import (
-	"log"
 	"math/rand"
-	"os"
 	"reflect"
+	"sync"
 	"testing"
 
-	"github.com/egonelbre/event"
-	"github.com/egonelbre/event/membus"
+	"github.com/egonelbre/guestlist/event"
+	"github.com/egonelbre/guestlist/event/membus"
 )
 
 func TestStore(t *testing.T) {
-	os.Remove("test.db")
-
 	pub := membus.New()
-	store, err := New("test.db", pub)
-	if err != nil {
-		t.Fatalf("failed to open db: %v", err)
-	}
+	store := New(pub)
 
 	a, a0, a1 := event.GenerateId(), 1, 2
 	b, b0, b1 := event.GenerateId(), 3, 4
-
-	checke := func(e error) {
-		if e != nil {
-			t.Fatal(e)
-		}
-	}
-
-	// save everything to disk
-
-	checke(store.Save(a, -1, a0))
-	checke(store.Save(b, -1, b0, b1))
-	checke(store.Save(a, -1, a1))
-
-	store.Close()
-
-	// try to load the same file from disk
-	store, err = New("test.db", pub)
-	if err != nil {
-		t.Fatalf("failed to open again db: %v", err)
-	}
-	defer store.Close()
 
 	check := func(ok bool, i int) {
 		if !ok {
@@ -50,9 +23,14 @@ func TestStore(t *testing.T) {
 		}
 	}
 
+	checke := func(e error) {
+		if e != nil {
+			t.Fatal(e)
+		}
+	}
+
 	step := 0
 	pub.Listen(func(e event.Event) {
-		t.Logf("got %v", e)
 		switch step {
 		case 0:
 			check(reflect.DeepEqual(e, 1), 1)
@@ -66,54 +44,43 @@ func TestStore(t *testing.T) {
 		step += 1
 	})
 
-	if err := store.Load(); err != nil {
-		log.Fatalf("loading failed: %v", err)
-	}
+	checke(store.Save(a, -1, a0))
+	checke(store.Save(b, -1, b0, b1))
+	checke(store.Save(a, -1, a1))
 
 	aevents, ok := store.List(a)
 	check(ok &&
 		aevents[0].Id == a && aevents[0].Data == a0 &&
-		aevents[1].Id == a && aevents[1].Data == a1, 5)
+		aevents[1].Id == a && aevents[1].Data == a1, 4)
 	bevents, ok := store.List(b)
 	check(ok &&
 		bevents[0].Id == b && bevents[0].Data == b0 &&
-		bevents[1].Id == b && bevents[1].Data == b1, 6)
+		bevents[1].Id == b && bevents[1].Data == b1, 5)
 }
 
 func TestStoreProject(t *testing.T) {
-	os.Remove("test2.db")
-	defer os.Remove("test2.db")
-
 	pub := membus.New()
-	store, err := New("test2.db", pub)
-	if err != nil {
-		t.Fatalf("failed to open db: %v", err)
-	}
+	store := New(pub)
 
-	var total int64
 	uuid := event.GenerateId()
-	N := int64(rand.Intn(100) + 50)
-	for i := int64(0); i < N; i += 1 {
-		v := int64(rand.Intn(256))
-		total = (total ^ v) << 3
-		if err != store.Save(uuid, i, v) {
-			t.Fatal(err)
-		}
-	}
-	store.Close()
 
-	store, err = New("test2.db", pub)
-	if err != nil {
-		t.Fatalf("failed to open db: %v", err)
-	}
-
+	m := sync.Mutex{}
 	project := int64(0)
+
 	pub.Listen(func(e event.Event) {
 		v := e.(int64)
+		m.Lock()
 		project = (project ^ v) << 3
+		m.Unlock()
 	})
-	store.Load()
-	store.Close()
+
+	total := int64(0)
+
+	for i := 0; i < rand.Intn(100)+50; i += 1 {
+		v := int64(rand.Intn(256))
+		total = (total ^ v) << 3
+		store.Save(uuid, int64(i), v)
+	}
 
 	if total != project {
 		t.Fatalf("something went wrong")
@@ -122,13 +89,7 @@ func TestStoreProject(t *testing.T) {
 
 func TestStoreConcurrencyError(t *testing.T) {
 	pub := membus.New()
-	store, err := New("test3.db", pub)
-	if err != nil {
-		t.Fatalf("failed to open db: %v", err)
-	}
-	defer os.Remove("test3.db")
-	defer store.Close()
-
+	store := New(pub)
 	uuid := event.GenerateId()
 
 	if err := store.Save(uuid, 0, 1); err != nil {
