@@ -1,5 +1,5 @@
-# DO NOT USE
+This is a reference application relying on CQRS/ES in Go.
 
-However, do take a look around. You should implement your own CQRS/ES layer 
-based on the needs of your application. It will be easier to manage and 
-configure than a framework/library. Copy&Paste as you see fit.
+You should not import/copy this verbatim, implement your own approach as
+needed. It will be easier to configure and adjust. This has been
+uploaded for educational purposes.
